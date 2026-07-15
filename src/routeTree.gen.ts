@@ -9,9 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PassengerRouteImport } from './routes/passenger'
+import { Route as DriverRouteImport } from './routes/driver'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as TrackTripIdRouteImport } from './routes/track.$tripId'
 import { Route as AdminTripsRouteImport } from './routes/admin.trips'
 import { Route as AdminRoutesRouteImport } from './routes/admin.routes'
 import { Route as AdminMonitorRouteImport } from './routes/admin.monitor'
@@ -19,6 +22,16 @@ import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
 import { Route as AdminBusesRouteImport } from './routes/admin.buses'
 import { Route as AdminAssignmentsRouteImport } from './routes/admin.assignments'
 
+const PassengerRoute = PassengerRouteImport.update({
+  id: '/passenger',
+  path: '/passenger',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverRoute = DriverRouteImport.update({
+  id: '/driver',
+  path: '/driver',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -33,6 +46,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const TrackTripIdRoute = TrackTripIdRouteImport.update({
+  id: '/track/$tripId',
+  path: '/track/$tripId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminTripsRoute = AdminTripsRouteImport.update({
   id: '/trips',
@@ -68,34 +86,43 @@ const AdminAssignmentsRoute = AdminAssignmentsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/driver': typeof DriverRoute
+  '/passenger': typeof PassengerRoute
   '/admin/assignments': typeof AdminAssignmentsRoute
   '/admin/buses': typeof AdminBusesRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/monitor': typeof AdminMonitorRoute
   '/admin/routes': typeof AdminRoutesRoute
   '/admin/trips': typeof AdminTripsRoute
+  '/track/$tripId': typeof TrackTripIdRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/driver': typeof DriverRoute
+  '/passenger': typeof PassengerRoute
   '/admin/assignments': typeof AdminAssignmentsRoute
   '/admin/buses': typeof AdminBusesRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/monitor': typeof AdminMonitorRoute
   '/admin/routes': typeof AdminRoutesRoute
   '/admin/trips': typeof AdminTripsRoute
+  '/track/$tripId': typeof TrackTripIdRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/driver': typeof DriverRoute
+  '/passenger': typeof PassengerRoute
   '/admin/assignments': typeof AdminAssignmentsRoute
   '/admin/buses': typeof AdminBusesRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/monitor': typeof AdminMonitorRoute
   '/admin/routes': typeof AdminRoutesRoute
   '/admin/trips': typeof AdminTripsRoute
+  '/track/$tripId': typeof TrackTripIdRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -103,43 +130,69 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/driver'
+    | '/passenger'
     | '/admin/assignments'
     | '/admin/buses'
     | '/admin/drivers'
     | '/admin/monitor'
     | '/admin/routes'
     | '/admin/trips'
+    | '/track/$tripId'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/driver'
+    | '/passenger'
     | '/admin/assignments'
     | '/admin/buses'
     | '/admin/drivers'
     | '/admin/monitor'
     | '/admin/routes'
     | '/admin/trips'
+    | '/track/$tripId'
     | '/admin'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/driver'
+    | '/passenger'
     | '/admin/assignments'
     | '/admin/buses'
     | '/admin/drivers'
     | '/admin/monitor'
     | '/admin/routes'
     | '/admin/trips'
+    | '/track/$tripId'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  DriverRoute: typeof DriverRoute
+  PassengerRoute: typeof PassengerRoute
+  TrackTripIdRoute: typeof TrackTripIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/passenger': {
+      id: '/passenger'
+      path: '/passenger'
+      fullPath: '/passenger'
+      preLoaderRoute: typeof PassengerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver': {
+      id: '/driver'
+      path: '/driver'
+      fullPath: '/driver'
+      preLoaderRoute: typeof DriverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -160,6 +213,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/track/$tripId': {
+      id: '/track/$tripId'
+      path: '/track/$tripId'
+      fullPath: '/track/$tripId'
+      preLoaderRoute: typeof TrackTripIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/trips': {
       id: '/admin/trips'
@@ -231,6 +291,9 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  DriverRoute: DriverRoute,
+  PassengerRoute: PassengerRoute,
+  TrackTripIdRoute: TrackTripIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
