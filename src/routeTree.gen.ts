@@ -12,8 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminTripsRouteImport } from './routes/admin.trips'
+import { Route as AdminRoutesRouteImport } from './routes/admin.routes'
+import { Route as AdminMonitorRouteImport } from './routes/admin.monitor'
 import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
 import { Route as AdminBusesRouteImport } from './routes/admin.buses'
+import { Route as AdminAssignmentsRouteImport } from './routes/admin.assignments'
 
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
@@ -30,6 +34,21 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminTripsRoute = AdminTripsRouteImport.update({
+  id: '/trips',
+  path: '/trips',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRoutesRoute = AdminRoutesRouteImport.update({
+  id: '/routes',
+  path: '/routes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMonitorRoute = AdminMonitorRouteImport.update({
+  id: '/monitor',
+  path: '/monitor',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDriversRoute = AdminDriversRouteImport.update({
   id: '/drivers',
   path: '/drivers',
@@ -40,39 +59,77 @@ const AdminBusesRoute = AdminBusesRouteImport.update({
   path: '/buses',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAssignmentsRoute = AdminAssignmentsRouteImport.update({
+  id: '/assignments',
+  path: '/assignments',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin/assignments': typeof AdminAssignmentsRoute
   '/admin/buses': typeof AdminBusesRoute
   '/admin/drivers': typeof AdminDriversRoute
+  '/admin/monitor': typeof AdminMonitorRoute
+  '/admin/routes': typeof AdminRoutesRoute
+  '/admin/trips': typeof AdminTripsRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/assignments': typeof AdminAssignmentsRoute
   '/admin/buses': typeof AdminBusesRoute
   '/admin/drivers': typeof AdminDriversRoute
+  '/admin/monitor': typeof AdminMonitorRoute
+  '/admin/routes': typeof AdminRoutesRoute
+  '/admin/trips': typeof AdminTripsRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin/assignments': typeof AdminAssignmentsRoute
   '/admin/buses': typeof AdminBusesRoute
   '/admin/drivers': typeof AdminDriversRoute
+  '/admin/monitor': typeof AdminMonitorRoute
+  '/admin/routes': typeof AdminRoutesRoute
+  '/admin/trips': typeof AdminTripsRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/admin/buses' | '/admin/drivers' | '/admin/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/admin/assignments'
+    | '/admin/buses'
+    | '/admin/drivers'
+    | '/admin/monitor'
+    | '/admin/routes'
+    | '/admin/trips'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin/buses' | '/admin/drivers' | '/admin'
+  to:
+    | '/'
+    | '/admin/assignments'
+    | '/admin/buses'
+    | '/admin/drivers'
+    | '/admin/monitor'
+    | '/admin/routes'
+    | '/admin/trips'
+    | '/admin'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/admin/assignments'
     | '/admin/buses'
     | '/admin/drivers'
+    | '/admin/monitor'
+    | '/admin/routes'
+    | '/admin/trips'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -104,6 +161,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/trips': {
+      id: '/admin/trips'
+      path: '/trips'
+      fullPath: '/admin/trips'
+      preLoaderRoute: typeof AdminTripsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/routes': {
+      id: '/admin/routes'
+      path: '/routes'
+      fullPath: '/admin/routes'
+      preLoaderRoute: typeof AdminRoutesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/monitor': {
+      id: '/admin/monitor'
+      path: '/monitor'
+      fullPath: '/admin/monitor'
+      preLoaderRoute: typeof AdminMonitorRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/drivers': {
       id: '/admin/drivers'
       path: '/drivers'
@@ -118,18 +196,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBusesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/assignments': {
+      id: '/admin/assignments'
+      path: '/assignments'
+      fullPath: '/admin/assignments'
+      preLoaderRoute: typeof AdminAssignmentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminAssignmentsRoute: typeof AdminAssignmentsRoute
   AdminBusesRoute: typeof AdminBusesRoute
   AdminDriversRoute: typeof AdminDriversRoute
+  AdminMonitorRoute: typeof AdminMonitorRoute
+  AdminRoutesRoute: typeof AdminRoutesRoute
+  AdminTripsRoute: typeof AdminTripsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAssignmentsRoute: AdminAssignmentsRoute,
   AdminBusesRoute: AdminBusesRoute,
   AdminDriversRoute: AdminDriversRoute,
+  AdminMonitorRoute: AdminMonitorRoute,
+  AdminRoutesRoute: AdminRoutesRoute,
+  AdminTripsRoute: AdminTripsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
