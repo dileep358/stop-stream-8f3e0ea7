@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_versions: {
+        Row: {
+          created_at: string
+          download_url: string | null
+          id: string
+          is_active: boolean
+          mandatory: boolean
+          platform: string
+          release_notes: string | null
+          version_code: number
+          version_name: string
+        }
+        Insert: {
+          created_at?: string
+          download_url?: string | null
+          id?: string
+          is_active?: boolean
+          mandatory?: boolean
+          platform?: string
+          release_notes?: string | null
+          version_code: number
+          version_name: string
+        }
+        Update: {
+          created_at?: string
+          download_url?: string | null
+          id?: string
+          is_active?: boolean
+          mandatory?: boolean
+          platform?: string
+          release_notes?: string | null
+          version_code?: number
+          version_name?: string
+        }
+        Relationships: []
+      }
       bus_driver_assignments: {
         Row: {
           assigned_at: string
@@ -156,40 +192,137 @@ export type Database = {
           },
         ]
       }
+      driver_login_attempts: {
+        Row: {
+          attempted_at: string
+          attempted_login_name: string
+          driver_id: string | null
+          id: string
+          ip_address: string | null
+          success: boolean
+          user_agent: string | null
+        }
+        Insert: {
+          attempted_at?: string
+          attempted_login_name: string
+          driver_id?: string | null
+          id?: string
+          ip_address?: string | null
+          success: boolean
+          user_agent?: string | null
+        }
+        Update: {
+          attempted_at?: string
+          attempted_login_name?: string
+          driver_id?: string | null
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_login_attempts_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_sessions: {
+        Row: {
+          created_at: string
+          device_id: string | null
+          driver_id: string
+          expires_at: string
+          id: string
+          ip_address: string | null
+          last_active_at: string
+          revoked_at: string | null
+          token_hash: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_id?: string | null
+          driver_id: string
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          last_active_at?: string
+          revoked_at?: string | null
+          token_hash: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_id?: string | null
+          driver_id?: string
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          last_active_at?: string
+          revoked_at?: string | null
+          token_hash?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_sessions_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drivers: {
         Row: {
           address: string | null
           created_at: string
+          failed_login_attempts: number
           id: string
           is_active: boolean
           licence_expiry: string | null
           licence_number: string
+          locked_until: string | null
+          login_name: string
           name: string
           phone: string
+          pin_hash: string | null
           status: Database["public"]["Enums"]["driver_status"]
           updated_at: string
         }
         Insert: {
           address?: string | null
           created_at?: string
+          failed_login_attempts?: number
           id?: string
           is_active?: boolean
           licence_expiry?: string | null
           licence_number: string
+          locked_until?: string | null
+          login_name: string
           name: string
           phone: string
+          pin_hash?: string | null
           status?: Database["public"]["Enums"]["driver_status"]
           updated_at?: string
         }
         Update: {
           address?: string | null
           created_at?: string
+          failed_login_attempts?: number
           id?: string
           is_active?: boolean
           licence_expiry?: string | null
           licence_number?: string
+          locked_until?: string | null
+          login_name?: string
           name?: string
           phone?: string
+          pin_hash?: string | null
           status?: Database["public"]["Enums"]["driver_status"]
           updated_at?: string
         }
