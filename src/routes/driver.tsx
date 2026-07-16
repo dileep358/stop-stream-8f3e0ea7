@@ -1,17 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MapView, type MapStop } from "@/components/MapView";
 import { StatusBadge } from "./admin.buses";
 import { toast } from "sonner";
-import { Play, Square, MapPin, Home, Loader2 } from "lucide-react";
+import { Play, Square, MapPin, Home, Loader2, LogOut, Eye, EyeOff, Download } from "lucide-react";
 import { haversine } from "@/lib/routing";
 import { fmtTime, fmtDistance, relativeTime } from "@/lib/format";
+import { driverLogin, driverMe, driverLogout } from "@/lib/driver-auth.functions";
 
 export const Route = createFileRoute("/driver")({ component: DriverPage });
 
-interface Driver { id: string; name: string; }
 interface TripFull {
   id: string; status: string; scheduled_start_time: string; actual_start_time: string | null;
   route_id: string; bus_id: string; driver_id: string;
@@ -22,20 +23,128 @@ interface TripFull {
 
 function DriverPage() {
   const qc = useQueryClient();
-  const [driverId, setDriverId] = useState<string>(() => (typeof window !== "undefined" ? localStorage.getItem("smart-bus-driver-id") ?? "" : ""));
+  const meFn = useServerFn(driverMe);
+  const logoutFn = useServerFn(driverLogout);
 
-  const { data: drivers = [] } = useQuery({
-    queryKey: ["drivers-select"],
-    queryFn: async () => (await supabase.from("drivers").select("id,name").eq("is_active", true).order("name")).data ?? [],
+  const { data: me, isLoading: meLoading } = useQuery({
+    queryKey: ["driver-me"],
+    queryFn: async () => await meFn(),
+    staleTime: 30_000,
   });
 
-  useEffect(() => {
-    if (driverId) localStorage.setItem("smart-bus-driver-id", driverId);
-  }, [driverId]);
+  const logout = useMutation({
+    mutationFn: async () => { await logoutFn(); },
+    onSuccess: () => { qc.setQueryData(["driver-me"], null); qc.invalidateQueries(); toast.success("Signed out"); },
+  });
 
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="border-b bg-card sticky top-0 z-40">
+        <div className="max-w-3xl mx-auto p-4 flex items-center gap-3">
+          <Link to="/" className="p-2 hover:bg-muted rounded-lg"><Home size={16} /></Link>
+          <div className="flex-1">
+            <div className="font-bold">Driver</div>
+            <div className="text-[11px] text-muted-foreground">{me?.name ?? "Not signed in"}</div>
+          </div>
+          {me && (
+            <button onClick={() => logout.mutate()} className="p-2 hover:bg-muted rounded-lg" title="Sign out">
+              <LogOut size={16} />
+            </button>
+          )}
+        </div>
+      </header>
+
+      <main className="flex-1 max-w-3xl w-full mx-auto p-4">
+        {meLoading ? (
+          <div className="flex justify-center py-16 text-muted-foreground"><Loader2 className="animate-spin" /></div>
+        ) : !me ? (
+          <LoginCard onLoggedIn={() => qc.invalidateQueries({ queryKey: ["driver-me"] })} />
+        ) : (
+          <DriverHome driverId={me.id} driverName={me.name} />
+        )}
+      </main>
+    </div>
+  );
+}
+
+function LoginCard({ onLoggedIn }: { onLoggedIn: () => void }) {
+  const [loginName, setLoginName] = useState("");
+  const [pin, setPin] = useState("");
+  const [showPin, setShowPin] = useState(false);
+  const [pending, setPending] = useState(false);
+  const loginFn = useServerFn(driverLogin);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginName.trim()) return toast.error("Enter your login name");
+    if (!/^\d{4}$/.test(pin)) return toast.error("PIN must be 4 digits");
+    setPending(true);
+    try {
+      await loginFn({ data: { login_name: loginName.trim(), pin } });
+      toast.success("Signed in");
+      onLoggedIn();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Sign in failed");
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <div className="bg-card border rounded-2xl p-6 max-w-sm mx-auto mt-8">
+      <div className="text-center mb-5">
+        <div className="text-4xl mb-2">🚌</div>
+        <h2 className="text-xl font-bold">Driver sign in</h2>
+        <p className="text-xs text-muted-foreground mt-1">Use the login name and 4-digit PIN issued by your administrator.</p>
+      </div>
+      <form onSubmit={submit} className="space-y-3">
+        <label className="block">
+          <div className="text-xs font-medium mb-1">Login name</div>
+          <input
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            value={loginName}
+            onChange={(e) => setLoginName(e.target.value.toLowerCase())}
+            placeholder="ramesh.kumar"
+            className="w-full px-3 py-2.5 rounded-lg border bg-background text-sm font-mono"
+          />
+        </label>
+        <label className="block">
+          <div className="text-xs font-medium mb-1">4-digit PIN</div>
+          <div className="relative">
+            <input
+              type={showPin ? "text" : "password"}
+              inputMode="numeric"
+              maxLength={4}
+              autoComplete="one-time-code"
+              value={pin}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              placeholder="••••"
+              className="w-full px-3 py-2.5 pr-10 rounded-lg border bg-background text-center text-lg tracking-[0.5em] font-mono"
+            />
+            <button type="button" onClick={() => setShowPin((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground">
+              {showPin ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+        </label>
+        <button type="submit" disabled={pending} className="w-full bg-primary text-primary-foreground font-medium py-2.5 rounded-lg disabled:opacity-50">
+          {pending ? "Signing in…" : "Sign in"}
+        </button>
+      </form>
+      <div className="border-t mt-5 pt-4 text-center">
+        <button disabled className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+          <Download size={14} /> Download Driver App (coming soon)
+        </button>
+        <div className="text-[11px] text-muted-foreground mt-2">Android build instructions in <code>DRIVER_APP_BUILD.md</code>.</div>
+      </div>
+    </div>
+  );
+}
+
+function DriverHome({ driverId, driverName }: { driverId: string; driverName: string }) {
   const { data: trip, isLoading } = useQuery({
     queryKey: ["driver-trip", driverId],
-    enabled: !!driverId,
     refetchInterval: 4000,
     queryFn: async () => {
       const { data, error } = await supabase.from("trips")
@@ -60,45 +169,17 @@ function DriverPage() {
     },
   });
 
-  return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b bg-card sticky top-0 z-40">
-        <div className="max-w-3xl mx-auto p-4 flex items-center gap-3">
-          <Link to="/" className="p-2 hover:bg-muted rounded-lg"><Home size={16} /></Link>
-          <div className="flex-1">
-            <div className="font-bold">Driver</div>
-            <div className="text-[11px] text-muted-foreground">{trip?.drivers?.name ?? "Not signed in"}</div>
-          </div>
-          <select value={driverId} onChange={(e) => { setDriverId(e.target.value); qc.invalidateQueries(); }} className="px-2 py-1.5 rounded-lg border bg-background text-sm max-w-[160px]">
-            <option value="">Select driver…</option>
-            {(drivers as Driver[]).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-          </select>
-        </div>
-      </header>
-
-      <main className="flex-1 max-w-3xl w-full mx-auto p-4">
-        {!driverId ? (
-          <EmptyCard title="Sign in to continue" desc="Select your driver profile above to see your assigned trip." />
-        ) : isLoading ? (
-          <div className="flex justify-center py-16 text-muted-foreground"><Loader2 className="animate-spin" /></div>
-        ) : !trip ? (
-          <EmptyCard title="No active trip has been assigned." desc="Once the administrator schedules a trip for you, it will appear here." />
-        ) : (
-          <TripPanel trip={trip} stops={stops} />
-        )}
-      </main>
-    </div>
-  );
-}
-
-function EmptyCard({ title, desc }: { title: string; desc: string }) {
-  return (
-    <div className="bg-card border rounded-2xl p-10 text-center">
-      <div className="text-5xl mb-3">🚌</div>
-      <div className="font-semibold">{title}</div>
-      <div className="text-sm text-muted-foreground mt-1">{desc}</div>
-    </div>
-  );
+  if (isLoading) return <div className="flex justify-center py-16 text-muted-foreground"><Loader2 className="animate-spin" /></div>;
+  if (!trip) {
+    return (
+      <div className="bg-card border rounded-2xl p-10 text-center">
+        <div className="text-5xl mb-3">🚌</div>
+        <div className="font-semibold">Welcome, {driverName}</div>
+        <div className="text-sm text-muted-foreground mt-1">No trip has been assigned by the administrator.</div>
+      </div>
+    );
+  }
+  return <TripPanel trip={trip} stops={stops} />;
 }
 
 function TripPanel({ trip, stops }: { trip: TripFull; stops: { stop_order: number; stops: { id: string; stop_name: string; latitude: number; longitude: number } }[] }) {
@@ -150,7 +231,6 @@ function TripPanel({ trip, stops }: { trip: TripFull; stops: { stop_order: numbe
     });
   };
 
-  // Auto-start tracking when trip is active
   useEffect(() => {
     if (isActive && !tracking) startWatch();
     return () => stopWatch();
@@ -159,7 +239,6 @@ function TripPanel({ trip, stops }: { trip: TripFull; stops: { stop_order: numbe
 
   const start = useMutation({
     mutationFn: async () => {
-      // request permission first
       const ok = startWatch();
       if (!ok) throw new Error("Cannot start GPS tracking");
       const now = new Date().toISOString();
@@ -185,7 +264,6 @@ function TripPanel({ trip, stops }: { trip: TripFull; stops: { stop_order: numbe
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // compute nearest / next stop
   const currentLatLng = pos ? { lat: pos.coords.latitude, lng: pos.coords.longitude } : null;
   let nextStop = stops[0]?.stops ?? null;
   let nearestIdx = 0;
