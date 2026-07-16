@@ -84,6 +84,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Real-time bus tracking, route management, and passenger search." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Smart Bus — Live Transit Tracking" },
+      { name: "twitter:description", content: "Real-time bus tracking, route management, and passenger search." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cff1a269-92a1-48a1-b8d7-8b90b0a0e24f/id-preview-b5522e82--3a1161c9-26d1-424d-80f0-fdb9ea35a1ea.lovable.app-1784178347027.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cff1a269-92a1-48a1-b8d7-8b90b0a0e24f/id-preview-b5522e82--3a1161c9-26d1-424d-80f0-fdb9ea35a1ea.lovable.app-1784178347027.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
