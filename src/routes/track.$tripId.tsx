@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/external-supabase/client";
 import { MapView, type MapStop } from "@/components/MapView";
 import { useLiveLocation, useTripStops } from "./admin.monitor";
 import { StatusBadge } from "./admin.buses";

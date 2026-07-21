@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/external-supabase/client";
 import { StatusBadge } from "./admin.buses";
 import { fmtDistance, fmtTime, relativeTime } from "@/lib/format";
 import { haversine } from "@/lib/routing";

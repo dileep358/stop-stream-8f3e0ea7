@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/external-supabase/client";
 import { StatusBadge } from "./admin.buses";
 import { Plus, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
