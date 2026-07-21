@@ -58,7 +58,7 @@ function DriversPage() {
     queryFn: async () => {
       const { data, error } = await supabase.from("bus_driver_assignments").select("driver_id,bus_id,buses(bus_number)").eq("is_active", true);
       if (error) throw error;
-      return data as { driver_id: string; bus_id: string; buses: { bus_number: string } | null }[];
+      return data as unknown as { driver_id: string; bus_id: string; buses: { bus_number: string } | null }[];
     },
   });
 
