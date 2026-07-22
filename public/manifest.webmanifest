@@ -1,0 +1,26 @@
+{
+  "name": "Smart Bus — Live Transit Tracking",
+  "short_name": "Smart Bus",
+  "description": "Real-time bus tracking, route management, and passenger search.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "categories": ["travel", "navigation", "utilities"],
+  "icons": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
