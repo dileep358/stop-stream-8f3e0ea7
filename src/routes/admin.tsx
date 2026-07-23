@@ -87,7 +87,7 @@ const nav: { to: string; label: string; icon: typeof Bus; exact?: boolean }[] = 
   { to: "/admin/monitor", label: "Live Monitor", icon: Radio },
 ];
 
-function AdminLayout() {
+function AdminLayout({ onLogout }: { onLogout: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <div className="min-h-screen flex bg-background">
@@ -116,12 +116,16 @@ function AdminLayout() {
             );
           })}
         </nav>
-        <div className="p-3 border-t">
+        <div className="p-3 border-t space-y-1">
+          <button onClick={onLogout} className="w-full flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-3 py-2 rounded-lg hover:bg-muted">
+            <LogOut size={14} /> Sign out
+          </button>
           <Link to="/" className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-3 py-2">
             <Home size={14} /> Back to home
           </Link>
         </div>
       </aside>
+
 
       {/* Mobile top nav */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t z-50 flex overflow-x-auto">
