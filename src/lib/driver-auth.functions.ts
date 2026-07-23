@@ -235,7 +235,7 @@ export const driverLogin = createServerFn({ method: "POST" })
     setCookie(SESSION_COOKIE, token, {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: "none",
       path: "/",
       maxAge: SESSION_TTL_SECONDS,
     });
