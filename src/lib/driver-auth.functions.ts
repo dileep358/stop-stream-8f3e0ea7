@@ -235,7 +235,7 @@ export const driverLogin = createServerFn({ method: "POST" })
     setCookie(SESSION_COOKIE, token, {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: "none",
       path: "/",
       maxAge: SESSION_TTL_SECONDS,
     });
@@ -282,6 +282,6 @@ export const driverLogout = createServerFn({ method: "POST" }).handler(async () 
       .update({ revoked_at: new Date().toISOString() } as never)
       .eq("token_hash", token_hash);
   }
-  deleteCookie(SESSION_COOKIE, { path: "/" });
+  deleteCookie(SESSION_COOKIE, { path: "/", sameSite: "none", secure: true });
   return { ok: true };
 });
