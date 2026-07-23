@@ -30,7 +30,8 @@ export const adminCreateDriver = createServerFn({ method: "POST" })
     const { validatePinFormat, hashPin } = await import("./driver-auth.server");
     const err = validatePinFormat(data.pin);
     if (err) throw new Error(err);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getExternalSupabaseAdmin } = await import("@/integrations/external-supabase/client.server");
+    const supabaseAdmin = getExternalSupabaseAdmin();
     const login_name = data.login_name.toLowerCase();
 
     const existing = await supabaseAdmin.from("drivers").select("id").ilike("login_name", login_name).maybeSingle();
@@ -74,7 +75,8 @@ export const adminUpdateDriver = createServerFn({ method: "POST" })
       .parse(raw),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getExternalSupabaseAdmin } = await import("@/integrations/external-supabase/client.server");
+    const supabaseAdmin = getExternalSupabaseAdmin();
     const login_name = data.login_name.toLowerCase();
     const clash = await supabaseAdmin.from("drivers").select("id").ilike("login_name", login_name).neq("id", data.id).maybeSingle();
     if (clash.data) throw new Error("Login name already used by another driver");
@@ -99,7 +101,8 @@ export const adminUpdateDriver = createServerFn({ method: "POST" })
 export const adminDeleteDriver = createServerFn({ method: "POST" })
   .inputValidator((raw) => z.object({ id: z.string().uuid() }).parse(raw))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getExternalSupabaseAdmin } = await import("@/integrations/external-supabase/client.server");
+    const supabaseAdmin = getExternalSupabaseAdmin();
     const { error } = await supabaseAdmin.from("drivers").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -121,7 +124,8 @@ export const adminResetDriverPin = createServerFn({ method: "POST" })
     const { validatePinFormat, hashPin } = await import("./driver-auth.server");
     const err = validatePinFormat(data.pin);
     if (err) throw new Error(err);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getExternalSupabaseAdmin } = await import("@/integrations/external-supabase/client.server");
+    const supabaseAdmin = getExternalSupabaseAdmin();
     const pin_hash = hashPin(data.pin);
     const { error } = await supabaseAdmin
       .from("drivers")
@@ -149,7 +153,8 @@ export const driverLogin = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { verifyPin, newSessionToken, hashSessionToken } = await import("./driver-auth.server");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getExternalSupabaseAdmin } = await import("@/integrations/external-supabase/client.server");
+    const supabaseAdmin = getExternalSupabaseAdmin();
 
     const login_name = data.login_name.toLowerCase().trim();
     const ua = getRequestHeader("user-agent") ?? null;
@@ -242,7 +247,8 @@ export const driverLogin = createServerFn({ method: "POST" })
 // -------- Driver: current session --------
 export const driverMe = createServerFn({ method: "GET" }).handler(async () => {
   const { hashSessionToken } = await import("./driver-auth.server");
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { getExternalSupabaseAdmin } = await import("@/integrations/external-supabase/client.server");
+    const supabaseAdmin = getExternalSupabaseAdmin();
   const token = getCookie(SESSION_COOKIE);
   if (!token) return null;
   const token_hash = hashSessionToken(token);
@@ -266,7 +272,8 @@ export const driverMe = createServerFn({ method: "GET" }).handler(async () => {
 // -------- Driver: logout --------
 export const driverLogout = createServerFn({ method: "POST" }).handler(async () => {
   const { hashSessionToken } = await import("./driver-auth.server");
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { getExternalSupabaseAdmin } = await import("@/integrations/external-supabase/client.server");
+    const supabaseAdmin = getExternalSupabaseAdmin();
   const token = getCookie(SESSION_COOKIE);
   if (token) {
     const token_hash = hashSessionToken(token);
